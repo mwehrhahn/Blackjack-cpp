@@ -1,1 +1,7 @@
+# Build artifacts
+*.o
+blackjack
+blackjack.exe
+
+# OS files
 .DS_Store
