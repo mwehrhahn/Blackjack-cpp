@@ -11,7 +11,7 @@ void Player::setBet(double bt)		//Sets user bet
 {
 	if (bt > balance)
 	{
-		bt = balance;
+		bet = balance;
 	}
 	else if (bt < MIN_BET)		//If bet is under minimum, default bet of minimum is set
 	{
