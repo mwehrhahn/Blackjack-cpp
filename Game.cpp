@@ -1,10 +1,6 @@
 #include "Game.h"	//Include header file with variables and all function prototypes
 
-Game::Game(int uH, int dH)	//constructor
-{
-	userHand = uH;
-	dealerHand = dH;
-}
+Game::Game(int uH, int dH) : userHand(uH), dealerHand(dH), over21(false) {}	//constructor
 
 void Game::dealInitialHands()	//deals initial hands for user and dealer at the start of a game
 {
