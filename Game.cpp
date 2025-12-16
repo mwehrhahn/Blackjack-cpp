@@ -49,7 +49,7 @@ int Game::getUserHand()				//Returns user hand
 
 void Game::printUserHand()			//Displays user hand
 {
-	cout << "User: " << getUserHand() << endl;
+	std::cout << "User: " << getUserHand() << std::endl;
 }
 
 void Game::setDealerHand()			//Function to set dealerHand. Used in dealInitialHands()
@@ -64,7 +64,7 @@ int Game::getDealerHand()			//Returns dealer hand
 
 void Game::printDealerHand()		//Displays dealer hand
 {
-	cout << "Dealer: " << getDealerHand() << endl;
+	std::cout << "Dealer: " << getDealerHand() << std::endl;
 }
 
 bool Game::isOver21(int uH)			//Checks for bust

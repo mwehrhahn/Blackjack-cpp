@@ -1,6 +1,6 @@
 #include "Player.h"		//Include header file with variables and all function prototypes
 
-Player::Player(string nm, double bal)	//Constructor
+Player::Player(std::string nm, double bal)	//Constructor
 {
 	name = nm;
 	balance = bal;
