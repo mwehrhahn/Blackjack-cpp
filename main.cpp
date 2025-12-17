@@ -1,6 +1,8 @@
 #include <iostream>																					//Required for cin and cout
 #include <cstdlib>																					//Required for random number generation
 #include <ctime>																					//Required for seeding randomness with srand()
+#include <limits>
+#include <string>
 #include "Player.h"																					//Include header file that contains the Player class
 #include "Game.h"																					//Include header file that contains the Game class
 using namespace std;																				//Using standard namesapce
@@ -29,12 +31,6 @@ void printMenu()
 {
 	cout << "Please make a choice:" << endl;
 	cout << "1. Hit\n2. Stand\n3. Double down" << endl;
-}
-
-//Print to set bet
-void printBet()
-{
-	cout << "Please place a bet: ";
 }
 
 //Checks if user has enough funds to place a minimum bet before each hand
@@ -82,6 +78,38 @@ void checkEnoughBalance(Player& player1)
 
 }
 
+// Validate input for buy-in
+int readIntInRange(const std::string& prompt, int min, int max) {
+	while (true) {
+		std::cout << prompt;
+		int value;
+
+		if (std::cin >> value && value >= min && value <= max) {
+			return value;
+		}
+
+		std::cout << "invalid input. Enter a number from " << min << " to " << max << ".\n";
+		std::cin.clear();
+		std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+	}
+}
+
+// Validate input for bet
+double readDoubleMin(const std::string& prompt, double min) {
+	while (true) {
+		std::cout << prompt;
+		double value;
+
+		if (std::cin >> value && value >= min) {
+			return value;
+		}
+
+		std::cout << "Invalid input. Enter a number >= " << min << ".\n";
+		std::cin.clear();
+		std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+	}
+}
+
 int main()
 {
 	srand(time(NULL));	//Sets random seed to guarantee rand() gives different results each time
@@ -96,8 +124,7 @@ int main()
 	printWelcome();
 	cout << "\n\nWhat is your name: ";
 	cin >> name;
-	cout << "\n\nWhat will you be buying in for: ";
-	cin >> balance;
+	balance = readDoubleMin("How much would you like to buy in with? $", 1.0);
 
 	//Create a new player object with name and balance
 	Player player1(name, balance);
@@ -109,30 +136,7 @@ int main()
 
 		//Start of do while loop that makes sure user inputs a valid option
 		do {
-			try
-			{
-				checkEnoughBalance(player1);
-				printOptions();
-				cin >> option;
-				
-				if (cin.fail())					//Throws exception if user didn't input an integer
-				{
-					throw runtime_error("Invalid input. Please enter a number.");
-				}
-
-				if (option < 1 || option > 3)	//Throws exception if user entered an integer less than 1 or greater than 3
-				{
-					throw runtime_error("Please choose 1, 2, or 3.");
-				}
-
-				validOption = true;
-			}
-			catch (const runtime_error& e)		//Catch the exception
-			{
-				cout << e.what() << endl;		//Print exception message
-				cin.clear();					//Clears invalid input
-				cin.ignore(10000, '\n');
-			}
+			option = readIntInRange("Enter menu option (1-3): ", 1, 3);
 		} while (!validOption);		//End of valid option do while loop
 
 		//Start of switch for user's option
@@ -142,8 +146,7 @@ int main()
 			standing = false;	//Player needs cards before standing
 			turn = 0;			//First turn
 			
-			printBet();
-			cin >> bet;
+			bet = readDoubleMin("Enter your bet: $", 5.0);
 
 			if (player1.getBalance() >= bet)		//Checks if user has enough money to place bet
 			{
@@ -167,8 +170,7 @@ int main()
 			}
 
 			//Gives user option to hit, stand, or double down
-			printMenu();
-			cin >> choice;
+			choice = readIntInRange("Choose: 1) Hit  2) Stand. 3) Double Down: ", 1, 3);
 
 			//Start of do while loop that handles the hand
 			do
