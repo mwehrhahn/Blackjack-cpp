@@ -33,34 +33,6 @@ void printMenu()
 	cout << "1. Hit\n2. Stand\n3. Double down" << endl;
 }
 
-//Checks if user has enough funds to place a minimum bet before each hand
-void checkEnoughBalance(Player& player1) 
-{
-	if (player1.getBalance() < 5.0)
-	{
-		double addBalance;
-		int addChoice;
-		cout << "\n\nYou are out of money!" << endl;
-		cout << "Would you like to add more?" << endl;
-		cout << "1. Yes\n2. No" << endl;
-		addChoice = readIntInRange("Enter choice (1-2): ", 1, 2);
-
-		if (addChoice == 1)										//Add balance to user balance
-		{
-			addBalance = readDoubleMin("How much would you like to add? $", 1.0);
-
-			player1.setBalance(player1.getBalance() + addBalance);
-			cout << "Your new balance is $" << player1.getBalance() << endl;
-		}
-		else
-		{
-			cout << "Thanks for playing! Come back when you have more money." << endl;
-			exit(0);	//ends the program
-		}
-	}
-
-}
-
 // Validate input for buy-in
 int readIntInRange(const std::string& prompt, int min, int max) {
 	while (true) {
@@ -91,6 +63,34 @@ double readDoubleMin(const std::string& prompt, double min) {
 		std::cin.clear();
 		std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 	}
+}
+
+//Checks if user has enough funds to place a minimum bet before each hand
+void checkEnoughBalance(Player& player1) 
+{
+	if (player1.getBalance() < 5.0)
+	{
+		double addBalance;
+		int addChoice;
+		cout << "\n\nYou are out of money!" << endl;
+		cout << "Would you like to add more?" << endl;
+		cout << "1. Yes\n2. No" << endl;
+		addChoice = readIntInRange("Enter choice (1-2): ", 1, 2);
+
+		if (addChoice == 1)										//Add balance to user balance
+		{
+			addBalance = readDoubleMin("How much would you like to add? $", 1.0);
+
+			player1.setBalance(player1.getBalance() + addBalance);
+			cout << "Your new balance is $" << player1.getBalance() << endl;
+		}
+		else
+		{
+			cout << "Thanks for playing! Come back when you have more money." << endl;
+			exit(0);	//ends the program
+		}
+	}
+
 }
 
 int main()
