@@ -5,32 +5,31 @@
 #include <string>
 #include "Player.h"																					//Include header file that contains the Player class
 #include "Game.h"																					//Include header file that contains the Game class
-using namespace std;																				//Using standard namesapce
 
 //Print Welcome screen explaining table rules
 void printWelcome()
 {
-	cout << "Welcome to the Wehrhahn Casino Blackjack Table" << endl;
-	cout << "The table minimum is $5 with no maximum" << endl;
-	cout << "Dealer hits on all 16s and stands on all 17s" << endl;
-	cout << "Blackjack pays out 3:2" << endl;
-	cout << "No insurance" << endl;
+	std::cout << "Welcome to the Wehrhahn Casino Blackjack Table" << std::endl;
+	std::cout << "The table minimum is $5 with no maximum" << std::endl;
+	std::cout << "Dealer hits on all 16s and stands on all 17s" << std::endl;
+	std::cout << "Blackjack pays out 3:2" << std::endl;
+	std::cout << "No insurance" << std::endl;
 }
 
 //Print menu in between hands
 void printOptions()
 {
-	cout << "What would you like to do?" << endl;
-	cout << "1. Place a bet" << endl;
-	cout << "2. Cash Out" << endl;
-	cout << "3. Check Balance" << endl;
+	std::cout << "What would you like to do?" << std::endl;
+	std::cout << "1. Place a bet" << std::endl;
+	std::cout << "2. Cash Out" << std::endl;
+	std::cout << "3. Check Balance" << std::endl;
 }
 
 //Print menu during hands
 void printMenu()
 {
-	cout << "Please make a choice:" << endl;
-	cout << "1. Hit\n2. Stand\n3. Double down" << endl;
+	std::cout << "Please make a choice:" << std::endl;
+	std::cout << "1. Hit\n2. Stand\n3. Double down" << std::endl;
 }
 
 // Validate input for buy-in
@@ -43,7 +42,7 @@ int readIntInRange(const std::string& prompt, int min, int max) {
 			return value;
 		}
 
-		std::cout << "invalid input. Enter a number from " << min << " to " << max << ".\n";
+		std::cout << "Invalid input. Enter a number from " << min << " to " << max << ".\n";
 		std::cin.clear();
 		std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 	}
@@ -72,9 +71,9 @@ void checkEnoughBalance(Player& player1)
 	{
 		double addBalance;
 		int addChoice;
-		cout << "\n\nYou are out of money!" << endl;
-		cout << "Would you like to add more?" << endl;
-		cout << "1. Yes\n2. No" << endl;
+		std::cout << "\n\nYou are out of money!" << std::endl;
+		std::cout << "Would you like to add more?" << std::endl;
+		std::cout << "1. Yes\n2. No" << std::endl;
 		addChoice = readIntInRange("Enter choice (1-2): ", 1, 2);
 
 		if (addChoice == 1)										//Add balance to user balance
@@ -82,11 +81,11 @@ void checkEnoughBalance(Player& player1)
 			addBalance = readDoubleMin("How much would you like to add? $", 1.0);
 
 			player1.setBalance(player1.getBalance() + addBalance);
-			cout << "Your new balance is $" << player1.getBalance() << endl;
+			std::cout << "Your new balance is $" << player1.getBalance() << std::endl;
 		}
 		else
 		{
-			cout << "Thanks for playing! Come back when you have more money." << endl;
+			std::cout << "Thanks for playing! Come back when you have more money." << std::endl;
 			exit(0);	//ends the program
 		}
 	}
@@ -98,15 +97,15 @@ int main()
 	srand(time(NULL));	//Sets random seed to guarantee rand() gives different results each time
 
 	//Declare and initialize player variables
-	string name;
+	std::string name;
 	double balance, bet;
 	int choice, option, turn;	//Variables for menu options and to check if doubling down is possible
 	bool standing = false;		//Variable to check if user chose stand option
 
 	//Print initial message explaining the table rules and asking user to buy in
 	printWelcome();
-	cout << "\n\nWhat is your name: ";
-	cin >> name;
+	std::cout << "\n\nWhat is your name: ";
+	std::cin >> name;
 	balance = readDoubleMin("How much would you like to buy in with? $", 1.0);
 
 	//Create a new player object with name and balance
@@ -116,6 +115,7 @@ int main()
 	//Start of do while loop that ends when user leaves table
 	do {
 
+		printOptions();
 		option = readIntInRange("Enter menu option (1-3): ", 1, 3);
 
 		//Start of switch for user's option
@@ -136,7 +136,7 @@ int main()
 			}
 			else	//Player has insufficient funds for bet. Loops back to printOptions();
 			{
-				cout << "You do not have enough money to place that bet!" << endl;
+				std::cout << "You do not have enough money to place that bet!" << std::endl;
 				break;
 			}
 
@@ -144,7 +144,7 @@ int main()
 
 			if (game.getUserHand() == 21)		//Check for blackjack
 			{
-				cout << "Blackjack! Winner winner chicken dinner!" << endl;
+				std::cout << "Blackjack! Winner winner chicken dinner!" << std::endl;
 				player1.setBalance((player1.getBalance() + (player1.getBet() * 2.5)));
 				break;
 			}
@@ -163,7 +163,7 @@ int main()
 
 					if (game.isOver21(game.getUserHand()))		//Check for bust
 					{
-						cout << "Bust! Over 21 sorry" << endl;
+						std::cout << "Bust! Over 21 sorry" << std::endl;
 					}
 					else										//No bust
 					{
@@ -190,23 +190,23 @@ int main()
 					
 					if (game.isOver21(game.getDealerHand()))	//Check for dealer bust
 					{
-						cout << "Dealer bust! You win!" << endl;
+						std::cout << "Dealer bust! You win!" << std::endl;
 						player1.setBalance(player1.getBalance() + player1.getBet() * 2);	//Payout original bet * 2
 						
 					}
 					else if (game.isWinner(game.getUserHand(), game.getDealerHand(), game.isOver21(game.getUserHand())))	// Check if user hand > dealer hand
 					{
-						cout << "You win!" << endl;
+						std::cout << "You win!" << std::endl;
 						player1.setBalance(player1.getBalance() + player1.getBet() * 2);	//Payout original bet * 2
 					}
 					else if (game.isDraw(game.getUserHand(), game.getDealerHand(), game.isOver21(game.getUserHand())))		//Check if user hand == dealer hand
 					{
-						cout << "It's a draw. All bets push" << endl;
+						std::cout << "It's a draw. All bets push" << std::endl;
 						player1.setBalance(player1.getBalance() + player1.getBet());		//Payout original bet
 					}
 					else																	//Dealer hand > user Hand
 					{
-						cout << "Sorry, you lose." << endl;
+						std::cout << "Sorry, you lose." << std::endl;
 
 					}
 
@@ -221,7 +221,7 @@ int main()
 					//Check if its the user's first turn, you can only double down on the first turn
 					if (turn != 0)
 					{
-						cout << "You can only double down on your first move." << endl;
+						std::cout << "You can only double down on your first move." << std::endl;
 						choice = readIntInRange("Choose: 1) Hit  2) Stand  3) Double Down: ", 1, 3);
 						break;
 					}
@@ -236,14 +236,14 @@ int main()
 					}
 					else																//User has insufficient funds and is prompted to hit, stand, or double down again
 					{
-						cout << "You don't have enough balance to double down." << endl;
+						std::cout << "You don't have enough balance to double down." << std::endl;
 						choice = readIntInRange("Choose: 1) Hit  2) Stand  3) Double Down: ", 1, 3);
 						break;
 					}
 					
 					if (game.isOver21(game.getUserHand()))			//Check for busst
 					{
-						cout << "Bust! Over 21 sorry" << endl;
+						std::cout << "Bust! Over 21 sorry" << std::endl;
 
 						//Reset game
 						game.newHand();
@@ -260,7 +260,7 @@ int main()
 
 							if (game.isOver21(game.getDealerHand()))								//Check for dealer bust
 							{
-								cout << "Dealer bust! You win!" << endl;
+								std::cout << "Dealer bust! You win!" << std::endl;
 								player1.setBalance(player1.getBalance() + player1.getBet() * 2);	//Payout original bet * 2
 
 								//Reset game
@@ -272,17 +272,17 @@ int main()
 
 						if (game.isWinner(game.getUserHand(), game.getDealerHand(), game.isOver21(game.getUserHand())))			//Check if user hand > dealer hand
 						{
-							cout << "You win!" << endl;
+							std::cout << "You win!" << std::endl;
 							player1.setBalance(player1.getBalance() + player1.getBet() * 2);									//Payout original bet * 2
 						}
 						else if (game.isDraw(game.getUserHand(), game.getDealerHand(), game.isOver21(game.getUserHand())))		//Check if user hand == dealer hand
 						{
-							cout << "It's a draw. All bets push" << endl;
+							std::cout << "It's a draw. All bets push" << std::endl;
 							player1.setBalance(player1.getBalance() + player1.getBet());										//Payout original bet 
 						}
 						else																									//Dealer hand > user hand
 						{
-							cout << "Sorry, you lose." << endl;
+							std::cout << "Sorry, you lose." << std::endl;
 
 						}
 
@@ -293,7 +293,7 @@ int main()
 					break;
 
 				default:	//Invalid option
-					cout << "Please enter a valid choice!" << endl;
+					std::cout << "Please enter a valid choice!" << std::endl;
 					break;
 				}
 
@@ -303,11 +303,11 @@ int main()
 			break;	//End of option 1
 
 		case 2:	//Option 2: Cash out displays user's final balance and ends the program
-			cout << "Thank you for playing! You cashed out with $" << player1.getBalance() << endl;
+			std::cout << "Thank you for playing! You cashed out with $" << player1.getBalance() << std::endl;
 			break;
 
 		case 3:	//Option 3: prints out user's current balance
-			cout << "Your balance is $" << player1.getBalance() << endl;
+			std::cout << "Your balance is $" << player1.getBalance() << std::endl;
 			break;
 
 		}	//End of switch
