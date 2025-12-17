@@ -25,13 +25,6 @@ void printOptions()
 	std::cout << "3. Check Balance" << std::endl;
 }
 
-//Print menu during hands
-void printMenu()
-{
-	std::cout << "Please make a choice:" << std::endl;
-	std::cout << "1. Hit\n2. Stand\n3. Double down" << std::endl;
-}
-
 // Validate input for buy-in
 int readIntInRange(const std::string& prompt, int min, int max) {
 	while (true) {
