@@ -43,28 +43,11 @@ void checkEnoughBalance(Player& player1)
 		cout << "\n\nYou are out of money!" << endl;
 		cout << "Would you like to add more?" << endl;
 		cout << "1. Yes\n2. No" << endl;
-		cin >> addChoice;
-		
-		while (cin.fail() || addChoice < 1 || addChoice > 2)	//Check for valid input
-		{
-			cin.clear();
-			cin.ignore(10000, '\n');
-			cout << "Please enter 1 or 2: ";
-			cin >> addChoice;
-		}
+		addChoice = readIntInRange("Enter choice (1-2): ", 1, 2);
 
 		if (addChoice == 1)										//Add balance to user balance
 		{
-			cout << "How much would you like to add? ";
-			cin >> addBalance;
-
-			while (cin.fail() || addBalance <= 0)				//Check for valid input
-			{
-				cin.clear();
-				cin.ignore(10000, '\n');
-				cout << "Please enter a valid amount: ";
-				cin >> addBalance;
-			}
+			addBalance = readDoubleMin("How much would you like to add? $", 1.0);
 
 			player1.setBalance(player1.getBalance() + addBalance);
 			cout << "Your new balance is $" << player1.getBalance() << endl;
@@ -132,12 +115,8 @@ int main()
 
 	//Start of do while loop that ends when user leaves table
 	do {
-		bool validOption = false;
 
-		//Start of do while loop that makes sure user inputs a valid option
-		do {
-			option = readIntInRange("Enter menu option (1-3): ", 1, 3);
-		} while (!validOption);		//End of valid option do while loop
+		option = readIntInRange("Enter menu option (1-3): ", 1, 3);
 
 		//Start of switch for user's option
 		switch (option)
@@ -145,6 +124,7 @@ int main()
 		case 1:	//Set the player's bet
 			standing = false;	//Player needs cards before standing
 			turn = 0;			//First turn
+			checkEnoughBalance(player1);
 			
 			bet = readDoubleMin("Enter your bet: $", 5.0);
 
@@ -190,8 +170,7 @@ int main()
 						//Print updated user hand and dealer hand and give user options to hit, stand, or double down and loop back to start of switch
 						game.printUserHand();
 						game.printDealerHand();
-						printMenu();
-						cin >> choice;
+						choice = readIntInRange("Choose: 1) Hit  2) Stand  3) Double Down: ", 1, 3);
 					}
 				
 					break;
@@ -243,8 +222,7 @@ int main()
 					if (turn != 0)
 					{
 						cout << "You can only double down on your first move." << endl;
-						printMenu();
-						cin >> choice;
+						choice = readIntInRange("Choose: 1) Hit  2) Stand  3) Double Down: ", 1, 3);
 						break;
 					}
 
@@ -259,8 +237,7 @@ int main()
 					else																//User has insufficient funds and is prompted to hit, stand, or double down again
 					{
 						cout << "You don't have enough balance to double down." << endl;
-						printMenu();
-						cin >> choice;
+						choice = readIntInRange("Choose: 1) Hit  2) Stand  3) Double Down: ", 1, 3);
 						break;
 					}
 					
