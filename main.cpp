@@ -1,7 +1,7 @@
 #include <iostream>
-#include <limits>
 #include <string>
 #include <algorithm>
+#include <cstdlib>
 #include "Player.h"
 #include "Game.h"
 #include "Input.h"
@@ -56,6 +56,10 @@ static void payoutWin(Player& p) {
 
 static void payoutPush(Player& p) {
     p.setBalance(p.getBalance() + p.getBet()); // return bet only
+}
+
+static void payoutBlackjack(Player& p) {
+	p.setBalance(p.getBalance() + p.getBet() * 2.5);
 }
 
 // Reveal dealer, hit to 17, settle outcome. Returns after resetting hand.
@@ -142,7 +146,7 @@ static void playHand(Game& game, Player& player) {
     // Player blackjack
     if (game.getUserHand() == 21) {
         std::cout << "Blackjack! You win!\n";
-        player.setBalance(player.getBalance() + player.getBet() * 2.5);
+        payoutBlackjack(player);
         game.newHand();
         return;
     }
