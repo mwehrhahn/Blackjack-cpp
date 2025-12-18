@@ -26,12 +26,13 @@ This is a simplified Blackjack implementation:
 
 ### macOS / Linux (g++)
 ```bash
-g++ -std=c++17 -Wall -Wextra -pedantic main.cpp Game.cpp Player.cpp -o blackjack
+g++ -std=c++17 -Wall -Wextra -pedantic main.cpp Game.cpp Player.cpp Deck.cpp Input.cpp -o blackjack
+
 ./blackjack
 
 ### Windows (minGW)
 ```bash
-g++ -std=c++17 -Wall -Wextra -pedantic main.cpp Game.cpp Player.cpp -o blackjack.exe
+g++ -std=c++17 -Wall -Wextra -pedantic main.cpp Game.cpp Player.cpp Deck.cpp Input.cpp -o blackjack.exe
 blackjack.exe
 
 
