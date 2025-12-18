@@ -1,119 +1,128 @@
 #include "Game.h"	//Include header file with variables and all function prototypes
+#include <algorithm>
 
-Game::Game(int uH, int dH) : userHand(uH), dealerHand(dH), over21(false) {}	//constructor
+//constructor
+Game::Game(int uH, int dH) : over21(false) {
+	(void)uH;
+	(void)dH;
+}	
 
-void Game::dealInitialHands()	//deals initial hands for user and dealer at the start of a game
-{
-	userHand = 0;
-	dealerHand = 0;
+int Game::scoreHand(const std::vector<Card>& hand) const {
+	int total = 0;
+	int aces = 0;
 
-	setUserHand();
-	setUserHand();
-	printUserHand();
+	for (const auto& c : hand) {
+		total += c.baseValue();
+		if (c.rank == 1) aces++;
+	}
 
-	setDealerHand();
-	printDealerHand();
+	// Convert Aces from 11 to 1 as needed
+	while (total > 21 && aces > 0) {
+		total -= 10;
+		aces--;
+	}
+	return total;
 }
 
-void Game::setHand(int& hand)	//deals a card to whichever hand is in the parameter
-{
-	int add = (rand() % 13 + 1);
-	if (add >= 11 && add <= 13)		//checks for jack, queen, or king
-	{
-		add = 10;					//all jacks, queens, and kings have a value of 10
+const std::vector<Card>& Game::getUserCards() const {
+	return userCards;
+}
+
+const std::vector<Card>& Game::getDealerCards() const {
+	return dealerCards;
+}
+
+void Game::dealInitialHands() {
+	over21 = false;
+	userCards.clear();
+	dealerCards.clear();
+
+	userCards.push_back(deck.draw());
+	dealerCards.push_back(deck.draw());
+	userCards.push_back(deck.draw());
+	dealerCards.push_back(deck.draw());
+}
+
+void Game::hitUser() {
+	userCards.push_back(deck.draw());
+}
+
+void Game::setDealerHand() {
+	dealerCards.push_back(deck.draw());
+}
+
+int Game::getUserHand() const {
+	return scoreHand(userCards);
+}
+
+int Game::getDealerHand() const{
+	return scoreHand(dealerCards);
+}
+
+// Displays user hand
+void Game::printUserHand() const {
+	std::cout << "User cards: ";
+	for (const auto& c : userCards) {
+		std::cout << "[" << c.toString() << "] ";
 	}
-	else if (add == 1)				//checks for ace
-	{
-		if (hand + 11 < 22)			//checks if ace can be 11
-		{
-			add = 11;
+	std::cout << "Total: " << getUserHand() << "\n";
+}
+
+// Displays dealer hand
+void Game::printDealerHand(bool hideHoleCard) const {		
+	std::cout << "Dealer cards: ";
+
+	for (std::size_t i = 0; i < dealerCards.size(); i++) {
+		if (hideHoleCard && i == 1) {
+			std::cout << "[Hidden] ";
+		} else {
+			std::cout << "[" << dealerCards[i].toString() << "] ";
 		}
-		else						//ace needs to be 1
-		{
-			add = 1;
-		}
 	}
 
-	hand += add;					//adds card to hand
-}
-
-void Game::setUserHand()			//Function to set userHand. Used in dealInitialHands()
-{
-	setHand(userHand);
-}
-
-int Game::getUserHand()				//Returns user hand
-{
-	return userHand;
-}
-
-void Game::printUserHand()			//Displays user hand
-{
-	std::cout << "User: " << getUserHand() << std::endl;
-}
-
-void Game::setDealerHand()			//Function to set dealerHand. Used in dealInitialHands()
-{
-	setHand(dealerHand);
-}
-
-int Game::getDealerHand()			//Returns dealer hand
-{
-	return dealerHand;
-}
-
-void Game::printDealerHand()		//Displays dealer hand
-{
-	std::cout << "Dealer: " << getDealerHand() << std::endl;
-}
-
-bool Game::isOver21(int uH)			//Checks for bust
-{
-	if (uH > 21)
-	{
-		over21 = true;
-	}
-	else
-	{
-		over21 = false;
+	if (!hideHoleCard) { 
+		std::cout << "Total: " << getDealerHand();
 	}
 
+	std::cout << "\n";
+}
+
+// Checks for bust
+bool Game::isOver21(int uH)	{
+	over21= (uH > 21);
 	return over21;
 }
 
-bool Game::isWinner(int uH, int dH, bool bust)	//Checks if user is a winner
+// Checks if user is a winner
+bool Game::isWinner(int uH, int dH, bool bust)
 {
-	if (bust)
-	{
-		return false;
-	}
-
-	else if (dH > 21)
-	{
-		return true;
-	}
-	else
-	{
-		return uH > dH;
-	}
+	if (bust) return false;
+	if (dH > 21) return true;
+	return uH > dH;
 
 }
 
-bool Game::isDraw(int uH, int dH, bool bust)	//Checks if userHand == dealerHand
+//Checks if userHand == dealerHand
+bool Game::isDraw(int uH, int dH, bool bust)
 {
-	if (bust)
-	{
-		return false;
-	}
-	else
-	{
-		return uH == dH;
-	}
+	if (bust) return false;
+	return uH == dH;
 }
 
-void Game::newHand()							//Resets hands for a new game
+bool Game::dealerShowsAce() const {
+	if (dealerCards.empty()) return false;
+	return dealerCards[0].rank == 1; // Ace
+}
+
+bool Game::dealerHasBlackjack() const {
+	if (dealerCards.size() < 2) return false;
+	return scoreHand(dealerCards) == 21;
+}
+
+// Resets hands for a new game
+void Game::newHand()
 {
-	userHand = 0;
-	dealerHand = 0;
+	userCards.clear();
+	dealerCards.clear();
 	over21 = false;
 }

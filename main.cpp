@@ -1,311 +1,245 @@
-#include <iostream>																					//Required for cin and cout
-#include <cstdlib>																					//Required for random number generation
-#include <ctime>																					//Required for seeding randomness with srand()
+#include <iostream>
+#include <cstdlib>
+#include <ctime>
 #include <limits>
 #include <string>
-#include "Player.h"																					//Include header file that contains the Player class
-#include "Game.h"																					//Include header file that contains the Game class
+#include "Player.h"
+#include "Game.h"
 
-//Print Welcome screen explaining table rules
-void printWelcome()
-{
-	std::cout << "Welcome to the Wehrhahn Casino Blackjack Table" << std::endl;
-	std::cout << "The table minimum is $5 with no maximum" << std::endl;
-	std::cout << "Dealer hits on all 16s and stands on all 17s" << std::endl;
-	std::cout << "Blackjack pays out 3:2" << std::endl;
-	std::cout << "No insurance" << std::endl;
+// ---------------- UI helpers ----------------
+
+void printWelcome() {
+    std::cout << "Welcome to the Wehrhahn Casino Blackjack Table\n";
+    std::cout << "The table minimum is $5 with no maximum\n";
+    std::cout << "Dealer hits on all 16s and stands on all 17s\n";
+    std::cout << "Blackjack pays out 3:2\n";
 }
 
-//Print menu in between hands
-void printOptions()
-{
-	std::cout << "What would you like to do?" << std::endl;
-	std::cout << "1. Place a bet" << std::endl;
-	std::cout << "2. Cash Out" << std::endl;
-	std::cout << "3. Check Balance" << std::endl;
+void printOptions() {
+    std::cout << "\nWhat would you like to do?\n";
+    std::cout << "1. Place a bet\n";
+    std::cout << "2. Cash Out\n";
+    std::cout << "3. Check Balance\n";
 }
 
-// Validate input for buy-in
 int readIntInRange(const std::string& prompt, int min, int max) {
-	while (true) {
-		std::cout << prompt;
-		int value;
-
-		if (std::cin >> value && value >= min && value <= max) {
-			return value;
-		}
-
-		std::cout << "Invalid input. Enter a number from " << min << " to " << max << ".\n";
-		std::cin.clear();
-		std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-	}
+    while (true) {
+        std::cout << prompt;
+        int value;
+        if (std::cin >> value && value >= min && value <= max) {
+            return value;
+        }
+        std::cout << "Invalid input.\n";
+        std::cin.clear();
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    }
 }
 
-// Validate input for bet
 double readDoubleMin(const std::string& prompt, double min) {
-	while (true) {
-		std::cout << prompt;
-		double value;
-
-		if (std::cin >> value && value >= min) {
-			return value;
-		}
-
-		std::cout << "Invalid input. Enter a number >= " << min << ".\n";
-		std::cin.clear();
-		std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-	}
+    while (true) {
+        std::cout << prompt;
+        double value;
+        if (std::cin >> value && value >= min) {
+            return value;
+        }
+        std::cout << "Invalid input.\n";
+        std::cin.clear();
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    }
 }
 
-//Checks if user has enough funds to place a minimum bet before each hand
-void checkEnoughBalance(Player& player1) 
-{
-	if (player1.getBalance() < 5.0)
-	{
-		double addBalance;
-		int addChoice;
-		std::cout << "\n\nYou are out of money!" << std::endl;
-		std::cout << "Would you like to add more?" << std::endl;
-		std::cout << "1. Yes\n2. No" << std::endl;
-		addChoice = readIntInRange("Enter choice (1-2): ", 1, 2);
+void checkEnoughBalance(Player& p) {
+    if (p.getBalance() >= 5.0) return;
 
-		if (addChoice == 1)										//Add balance to user balance
-		{
-			addBalance = readDoubleMin("How much would you like to add? $", 1.0);
+    std::cout << "\nYou are out of money.\n";
+    int choice = readIntInRange("Add more funds? 1) Yes  2) No: ", 1, 2);
 
-			player1.setBalance(player1.getBalance() + addBalance);
-			std::cout << "Your new balance is $" << player1.getBalance() << std::endl;
-		}
-		else
-		{
-			std::cout << "Thanks for playing! Come back when you have more money." << std::endl;
-			exit(0);	//ends the program
-		}
-	}
-
+    if (choice == 1) {
+        double add = readDoubleMin("Amount to add: $", 1.0);
+        p.setBalance(p.getBalance() + add);
+    } else {
+        std::cout << "Thanks for playing.\n";
+        exit(0);
+    }
 }
 
-int main()
-{
-	srand(time(NULL));	//Sets random seed to guarantee rand() gives different results each time
+// ---------------- Main ----------------
 
-	//Declare and initialize player variables
-	std::string name;
-	double balance, bet;
-	int choice, option, turn;	//Variables for menu options and to check if doubling down is possible
-	bool standing = false;		//Variable to check if user chose stand option
+int main() {
+    srand(static_cast<unsigned>(time(nullptr)));
 
-	//Print initial message explaining the table rules and asking user to buy in
-	printWelcome();
-	std::cout << "\n\nWhat is your name: ";
-	std::cin >> name;
-	balance = readDoubleMin("How much would you like to buy in with? $", 1.0);
+    std::string name;
+    double balance, bet;
 
-	//Create a new player object with name and balance
-	Player player1(name, balance);
-	Game game;
+    printWelcome();
+    std::cout << "\nWhat is your name: ";
+    std::cin >> name;
+    balance = readDoubleMin("How much would you like to buy in with? $", 1.0);
 
-	//Start of do while loop that ends when user leaves table
-	do {
+    Player player(name, balance);
+    Game game;
 
-		printOptions();
-		option = readIntInRange("Enter menu option (1-3): ", 1, 3);
+    int option;
 
-		//Start of switch for user's option
-		switch (option)
-		{
-		case 1:	//Set the player's bet
-			standing = false;	//Player needs cards before standing
-			turn = 0;			//First turn
-			checkEnoughBalance(player1);
-			
-			bet = readDoubleMin("Enter your bet: $", 5.0);
+    do {
+        printOptions();
+        option = readIntInRange("Enter menu option (1-3): ", 1, 3);
 
-			if (player1.getBalance() >= bet)		//Checks if user has enough money to place bet
-			{
-				//Set the bet and subtract from balance
-				player1.setBet(bet);
-				player1.setBalance((player1.getBalance() - player1.getBet()));
-			}
-			else	//Player has insufficient funds for bet. Loops back to printOptions();
-			{
-				std::cout << "You do not have enough money to place that bet!" << std::endl;
-				break;
-			}
+        switch (option) {
 
-			game.dealInitialHands();	//Start of a hand
+        // ========================= PLAY HAND =========================
+        case 1: {
+            checkEnoughBalance(player);
 
-			if (game.getUserHand() == 21)		//Check for blackjack
-			{
-				std::cout << "Blackjack! Winner winner chicken dinner!" << std::endl;
-				player1.setBalance((player1.getBalance() + (player1.getBet() * 2.5)));
-				break;
-			}
+            bet = readDoubleMin("Enter your bet: $", 5.0);
+            if (player.getBalance() < bet) {
+                std::cout << "Insufficient balance.\n";
+                break;
+            }
 
-			//Gives user option to hit, stand, or double down
-			choice = readIntInRange("Choose: 1) Hit  2) Stand. 3) Double Down: ", 1, 3);
+            player.setBet(bet);
+            player.setBalance(player.getBalance() - bet);
 
-			//Start of do while loop that handles the hand
-			do
-			{
-				//Start of switch that handles the user's options
-				switch (choice)
-				{
-				case 1:	// Option: Hit
-					game.setUserHand();							//Give user another card
+            game.dealInitialHands();
+            game.printUserHand();
+            game.printDealerHand(true);
 
-					if (game.isOver21(game.getUserHand()))		//Check for bust
-					{
-						std::cout << "Bust! Over 21 sorry" << std::endl;
-					}
-					else										//No bust
-					{
-						//Print updated user hand and dealer hand and give user options to hit, stand, or double down and loop back to start of switch
-						game.printUserHand();
-						game.printDealerHand();
-						choice = readIntInRange("Choose: 1) Hit  2) Stand  3) Double Down: ", 1, 3);
-					}
-				
-					break;
-				
-				case 2:	//Option: stand
-					//Deal a card to dealer
-					game.setDealerHand();
-					game.printDealerHand();
+            // ---------- Insurance ----------
+            double insuranceBet = 0.0;
 
-					//Deal dealer's hand until they reach at least 17
-					while (game.getDealerHand() < 17)
-					{
-						game.setDealerHand();
-						game.printDealerHand();
+            if (game.dealerShowsAce()) {
+                int ins = readIntInRange(
+                    "Dealer shows an Ace. Buy insurance?\n1) Yes  2) No: ", 1, 2);
 
-					}
-					
-					if (game.isOver21(game.getDealerHand()))	//Check for dealer bust
-					{
-						std::cout << "Dealer bust! You win!" << std::endl;
-						player1.setBalance(player1.getBalance() + player1.getBet() * 2);	//Payout original bet * 2
-						
-					}
-					else if (game.isWinner(game.getUserHand(), game.getDealerHand(), game.isOver21(game.getUserHand())))	// Check if user hand > dealer hand
-					{
-						std::cout << "You win!" << std::endl;
-						player1.setBalance(player1.getBalance() + player1.getBet() * 2);	//Payout original bet * 2
-					}
-					else if (game.isDraw(game.getUserHand(), game.getDealerHand(), game.isOver21(game.getUserHand())))		//Check if user hand == dealer hand
-					{
-						std::cout << "It's a draw. All bets push" << std::endl;
-						player1.setBalance(player1.getBalance() + player1.getBet());		//Payout original bet
-					}
-					else																	//Dealer hand > user Hand
-					{
-						std::cout << "Sorry, you lose." << std::endl;
+                if (ins == 1) {
+                    double maxIns = std::min(player.getBet() / 2.0, player.getBalance());
+                    insuranceBet = readDoubleMin(
+                        "Insurance amount (0 to half bet): $", 0.0);
 
-					}
+                    while (insuranceBet > maxIns) {
+                        std::cout << "Max insurance is $" << maxIns << "\n";
+                        insuranceBet = readDoubleMin("Insurance amount: $", 0.0);
+                    }
+                    player.setBalance(player.getBalance() - insuranceBet);
+                }
 
-					standing = true;	//Set standing option to true to exit do while loop
+                if (game.dealerHasBlackjack()) {
+                    game.printDealerHand(false);
+                    std::cout << "Dealer has blackjack.\n";
+                    if (insuranceBet > 0) {
+                        std::cout << "Insurance pays 2:1.\n";
+                        player.setBalance(player.getBalance() + insuranceBet * 3);
+                    }
+                    game.newHand();
+                    break;
+                }
+            }
 
-					//Reset game
-					game.newHand();
+            if (game.getUserHand() == 21) {
+                std::cout << "Blackjack! You win!\n";
+                player.setBalance(player.getBalance() + player.getBet() * 2.5);
+                game.newHand();
+                break;
+            }
 
-					break;
+            // ---------- Player Turn ----------
+            bool standing = false;
+            int turn = 0;
 
-				case 3:	//Option: Double down
-					//Check if its the user's first turn, you can only double down on the first turn
-					if (turn != 0)
-					{
-						std::cout << "You can only double down on your first move." << std::endl;
-						choice = readIntInRange("Choose: 1) Hit  2) Stand  3) Double Down: ", 1, 3);
-						break;
-					}
+            while (!standing && !game.isOver21(game.getUserHand())) {
 
-					//Check if user has sufficient funds
-					if (player1.getBalance() >= player1.getBet())
-					{
-						player1.setBalance(player1.getBalance() - player1.getBet());	//Subtract original bet again
-						player1.setBet(player1.getBet() * 2);							//Double original bet
-						game.setUserHand();												//Give user one more card only
-						game.printUserHand();
-					}
-					else																//User has insufficient funds and is prompted to hit, stand, or double down again
-					{
-						std::cout << "You don't have enough balance to double down." << std::endl;
-						choice = readIntInRange("Choose: 1) Hit  2) Stand  3) Double Down: ", 1, 3);
-						break;
-					}
-					
-					if (game.isOver21(game.getUserHand()))			//Check for busst
-					{
-						std::cout << "Bust! Over 21 sorry" << std::endl;
+                int choice = (turn == 0)
+                    ? readIntInRange("Choose: 1) Hit  2) Stand  3) Double Down: ", 1, 3)
+                    : readIntInRange("Choose: 1) Hit  2) Stand: ", 1, 2);
 
-						//Reset game
-						game.newHand();
-						standing = true;		//Set stand to true to exit loop
-						break;
-					}
-					else
-					{
-						//Deal dealer's hand until they reach at least 17
-						while (game.getDealerHand() < 17)
-						{
-							game.setDealerHand();
-							game.printDealerHand();
+                // ---- HIT ----
+                if (choice == 1) {
+                    game.hitUser();
+                    game.printUserHand();
+                    game.printDealerHand(true);
+                }
 
-							if (game.isOver21(game.getDealerHand()))								//Check for dealer bust
-							{
-								std::cout << "Dealer bust! You win!" << std::endl;
-								player1.setBalance(player1.getBalance() + player1.getBet() * 2);	//Payout original bet * 2
+                // ---- STAND ----
+                else if (choice == 2) {
+                    game.printDealerHand(false);
+                    while (game.getDealerHand() < 17) {
+                        game.setDealerHand();
+                        game.printDealerHand(false);
+                    }
 
-								//Reset game
-								game.newHand();
-								standing = true;													//Set stand to true to exit loop
-								break;
-							}
-						}
+                    if (game.isOver21(game.getDealerHand()) ||
+                        game.isWinner(game.getUserHand(), game.getDealerHand(), false)) {
+                        std::cout << "You win!\n";
+                        player.setBalance(player.getBalance() + player.getBet() * 2);
+                    } else if (game.isDraw(game.getUserHand(), game.getDealerHand(), false)) {
+                        std::cout << "Push.\n";
+                        player.setBalance(player.getBalance() + player.getBet());
+                    } else {
+                        std::cout << "You lose.\n";
+                    }
 
-						if (game.isWinner(game.getUserHand(), game.getDealerHand(), game.isOver21(game.getUserHand())))			//Check if user hand > dealer hand
-						{
-							std::cout << "You win!" << std::endl;
-							player1.setBalance(player1.getBalance() + player1.getBet() * 2);									//Payout original bet * 2
-						}
-						else if (game.isDraw(game.getUserHand(), game.getDealerHand(), game.isOver21(game.getUserHand())))		//Check if user hand == dealer hand
-						{
-							std::cout << "It's a draw. All bets push" << std::endl;
-							player1.setBalance(player1.getBalance() + player1.getBet());										//Payout original bet 
-						}
-						else																									//Dealer hand > user hand
-						{
-							std::cout << "Sorry, you lose." << std::endl;
+                    game.newHand();
+                    standing = true;
+                }
 
-						}
+                // ---- DOUBLE DOWN ----
+                else {
+                    if (turn != 0 || player.getBalance() < player.getBet()) {
+                        std::cout << "Cannot double down.\n";
+                        continue;
+                    }
 
-						//Reset game
-						game.newHand();
-						standing = true;	//Set stand to true to exit loop
-					}
-					break;
+                    player.setBalance(player.getBalance() - player.getBet());
+                    player.setBet(player.getBet() * 2);
 
-				default:	//Invalid option
-					std::cout << "Please enter a valid choice!" << std::endl;
-					break;
-				}
+                    game.hitUser();
+                    game.printUserHand();
 
-				turn++;	//Increment turn
-			} while (!game.isOver21(game.getUserHand()) && !standing);
+                    if (game.isOver21(game.getUserHand())) {
+                        std::cout << "Bust.\n";
+                        game.newHand();
+                        break;
+                    }
 
-			break;	//End of option 1
+                    game.printDealerHand(false);
+                    while (game.getDealerHand() < 17) {
+                        game.setDealerHand();
+                        game.printDealerHand(false);
+                    }
 
-		case 2:	//Option 2: Cash out displays user's final balance and ends the program
-			std::cout << "Thank you for playing! You cashed out with $" << player1.getBalance() << std::endl;
-			break;
+                    if (game.isOver21(game.getDealerHand()) ||
+                        game.isWinner(game.getUserHand(), game.getDealerHand(), false)) {
+                        std::cout << "You win!\n";
+                        player.setBalance(player.getBalance() + player.getBet() * 2);
+                    } else if (game.isDraw(game.getUserHand(), game.getDealerHand(), false)) {
+                        std::cout << "Push.\n";
+                        player.setBalance(player.getBalance() + player.getBet());
+                    } else {
+                        std::cout << "You lose.\n";
+                    }
 
-		case 3:	//Option 3: prints out user's current balance
-			std::cout << "Your balance is $" << player1.getBalance() << std::endl;
-			break;
+                    game.newHand();
+                    standing = true;
+                }
 
-		}	//End of switch
+                turn++;
+            }
 
-	} while (option != 2);	//End of while
+            break;
+        }
 
-	return 0;
-}	//End of main
+        // ========================= CASH OUT =========================
+        case 2:
+            std::cout << "You cash out with $" << player.getBalance() << "\n";
+            break;
+
+        // ========================= BALANCE =========================
+        case 3:
+            std::cout << "Current balance: $" << player.getBalance() << "\n";
+            break;
+        }
+
+    } while (option != 2);
+
+    return 0;
+}
